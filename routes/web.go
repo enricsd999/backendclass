@@ -6,9 +6,7 @@ import (
 )
 
 func RegisterRoutes() {
-	http.HandleFunc("/login", handlers.Login_Attempt)
-	http.HandleFunc(" /profile", handlers.HandlerUser)
-	http.HandleFunc("/", handlers.HandlerData)
+	http.HandleFunc("/update", handlers.UpdateData)
 
 	http.ListenAndServe(":8080", nil)
 }
