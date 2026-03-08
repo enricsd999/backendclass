@@ -35,7 +35,10 @@ func UpdateData(w http.ResponseWriter, r *http.Request) {
 	res := struct {
 		Code    string `json:"code"`
 		Message string `json:"message"`
-	}{}
+	}{
+		Code:    "200",
+		Message: "Data Updated",
+	}
 	jsonData, err := json.Marshal(res)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
