@@ -13,34 +13,51 @@ import (
 func UpdateData(w http.ResponseWriter, r *http.Request) {
 	body := struct {
 		Username  string `json:"username"`
-		FirstName string `json:"fname"`
-		LastName  string `json:"lname"`
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
 	}{}
-	json.NewDecoder(r.Body).Decode(&body)
-	db, err := sql.Open("mysql", os.Getenv("DSN"))
+
+	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	dsn := os.Getenv("DSN")
+
+	//Connect to Database
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	stmt, err := db.Prepare(`UPDATE users SET FIRST_NAME = ? , LAST_NAME = ? WHERE USERNAME = ?`)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
 	_, err = stmt.Exec(body.FirstName, body.LastName, body.Username)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
 	res := struct {
-		Code    string `json:"code"`
+		Code    int    `json:"code"`
 		Message string `json:"message"`
 	}{
-		Code:    "200",
+		Code:    200,
 		Message: "Data Updated",
 	}
+
 	jsonData, err := json.Marshal(res)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
-
 }
