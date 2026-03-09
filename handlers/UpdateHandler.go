@@ -15,7 +15,6 @@ func UpdateData(w http.ResponseWriter, r *http.Request) {
 		Username  string `json:"username"`
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`
-		Email     string `json:"email"`
 	}{}
 
 	err := json.NewDecoder(r.Body).Decode(&body)
@@ -33,13 +32,13 @@ func UpdateData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmt, err := db.Prepare(`UPDATE users SET FIRST_NAME = ? , LAST_NAME = ? , EMAIL = ? WHERE USERNAME = ?`)
+	stmt, err := db.Prepare(`UPDATE users SET FIRST_NAME = ? , LAST_NAME = ? WHERE USERNAME = ?`)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	_, err = stmt.Exec(body.FirstName, body.LastName, body.Email, body.Username)
+	_, err = stmt.Exec(body.FirstName, body.LastName, body.Username)
 	if err != nil {
 		fmt.Println(err)
 		return
