@@ -1,14 +1,6 @@
 package handlers
 
 import (
-<<<<<<< HEAD
-	"loginsystem/database"
-	"net/http"
-)
-
-func Login(w http.ResponseWriter, r *http.Request) {
-	db := database.ConnectDatabase()
-=======
 	"fmt"
 	"loginsystem/database"
 	"net/http"
@@ -24,6 +16,5 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		return
 	}
->>>>>>> empty
 	_ = db
 }
