@@ -27,6 +27,24 @@ type Account struct {
 // @Router /login [post]
 func Login_Attempt(w http.ResponseWriter, r *http.Request) {
 
+	//CORS HARUS BERJALAN SEBELUM HANDLER BERJALAN
+	allowedOrigins := map[string]bool{
+		"http://localhost:5173": true,
+	}
+	origin := r.Header.Get("Origin")
+	if allowedOrigins[origin] {
+		w.Header().Set("Access-Control-Allow-Origin", origin) // Gunakan domain spesifik di produksi
+	}
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Authorization")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusNoContent) // or http.StatusOK
+		// w.WriteHeader(http.StatusOK) // or http.StatusOK
+		return // Don't call next handler
+	}
+
 	dsn := "root:@tcp(127.0.0.1:3306)/backend?parseTime=true"
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
@@ -49,10 +67,26 @@ func Login_Attempt(w http.ResponseWriter, r *http.Request) {
 
 	//Lakukan query dan simpan hasil query di variabel username dan password
 	var usernameFromDatabase, passwordFromDatabase, role string
-	row := db.QueryRow(`SELECT USERNAME,PASSWORD,ROLE FROM login_account WHERE USERNAME = ?`, acc.UsernameFromUser)
+	row := db.QueryRow(`SELECT USER,PASS,ROLE FROM login_account WHERE USER = ?`, acc.UsernameFromUser)
 	err = row.Scan(&usernameFromDatabase, &passwordFromDatabase, &role)
 	if err != nil {
-		fmt.Println(err)
+		res := struct {
+			Response string `json:"response"`
+			Status   int    `json:"status"`
+			Message  string `json:"message"`
+		}{
+			Response: "Unauthorized",
+			Status:   401,
+			Message:  "Wrong Username or Password",
+		}
+		jsonData, err := json.Marshal(res)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonData)
+		fmt.Println("4", err)
 		return
 	}
 
