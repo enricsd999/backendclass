@@ -6,7 +6,6 @@ import (
 )
 
 func RegisterRoutes() {
-	http.HandleFunc("POST /insert", handlers.InsertData)
-	http.HandleFunc("POST /delete", handlers.DeleteData)
+	http.HandleFunc("/getdata", handlers.GetData)
 	http.ListenAndServe(":8080", nil)
 }
