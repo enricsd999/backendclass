@@ -6,6 +6,7 @@ import (
 )
 
 func RegisterRoutes() {
-	http.HandleFunc("/getdata", handlers.GetData)
+	http.HandleFunc("/upload", handlers.UploadFile)
+	http.HandleFunc("/getimage", handlers.GetImage)
 	http.ListenAndServe(":8080", nil)
 }
