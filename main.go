@@ -1,35 +1,85 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"time"
+	"net/http"
+	"sync"
 )
 
-func sayHello(ch chan string) {
-	fmt.Println(<-ch)
+type Post struct {
+	ID    int    `json:"id"`
+	Title string `json:"title"`
+}
+
+type User struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type Todo struct {
+	ID    int    `json:"id"`
+	Title string `json:"title"`
+	Done  bool   `json:"completed"`
+}
+
+func fetchPosts(wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	resp, err := http.Get("https://jsonplaceholder.typicode.com/posts/1")
+	if err != nil {
+		fmt.Println("posts error:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	var post Post
+	json.NewDecoder(resp.Body).Decode(&post)
+
+	fmt.Println("Post:", post.Title)
+}
+
+func fetchUser(wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	resp, err := http.Get("https://jsonplaceholder.typicode.com/users/1")
+	if err != nil {
+		fmt.Println("user error:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	var user User
+	json.NewDecoder(resp.Body).Decode(&user)
+
+	fmt.Println("User:", user.Name)
+}
+
+func fetchTodo(wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	resp, err := http.Get("https://jsonplaceholder.typicode.com/todos/1")
+	if err != nil {
+		fmt.Println("todo error:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	var todo Todo
+	json.NewDecoder(resp.Body).Decode(&todo)
+
+	fmt.Println("Todo:", todo.Title, "Done:", todo.Done)
 }
 
 func main() {
+	var wg sync.WaitGroup
 
-	channel1 := make(chan string)
-	channel2 := make(chan string)
-	// go sayHello(channel)
-	go sayHello2(channel1, channel2)
-	channel1 <- "Goroutine 1"
-	fmt.Println("Main")
-	// time.Sleep(2 * time.Second)
-	channel2 <- "Goroutine 2"
-	// time.Sleep(2 * time.Second)
-	time.Sleep(1 * time.Second)
-}
+	wg.Add(3)
 
-func sayHello2(ch1 chan string, ch2 chan string) {
-	for {
-		select {
-		case msg1 := <-ch1:
-			fmt.Println(msg1)
-		case msg2 := <-ch2:
-			fmt.Println(msg2)
-		}
-	}
+	go fetchPosts(&wg)
+	go fetchUser(&wg)
+	go fetchTodo(&wg)
+
+	wg.Wait()
+	fmt.Println("All API calls finished")
 }
