@@ -117,6 +117,7 @@ func FetchData(w http.ResponseWriter, r *http.Request) {
 		UserResult: <-chUsers,
 		PostResult: <-chPosts,
 	}
+	wg.Wait()
 
 	jsonData, err := json.Marshal(results)
 	if err != nil {
@@ -124,7 +125,6 @@ func FetchData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	wg.Wait()
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
 }
